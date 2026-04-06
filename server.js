@@ -138,8 +138,17 @@ const upload = multer({ dest: path.join(DATA_DIR, 'tmp') });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', (_req, res) => {
-  res.json({ ok: true, server: 'Heeph Skin Server' });
+app.get('/', (req, res) => {
+  res.json({
+    meta: {
+      serverName: 'Heeph Skins',
+      implementationName: 'heeph-skin-server',
+      implementationVersion: '1.0',
+      feature: { non_email_login: true },
+    },
+    skinDomains: [req.get('host')],
+    signaturePublickey: PUBLIC_KEY,
+  });
 });
 
 app.get('/healthz', (_req, res) => {
