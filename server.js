@@ -243,9 +243,37 @@ app.get('/api/changelog', (req, res) => {
   res.json({ ok: true, items: readFeed(CHANGELOG_FILE) });
 });
 
-app.post('/webhook/news', (req, res) => {
+function requireAdminKey(req, res) {
   const key = String(req.query.key || req.headers['x-heeph-key'] || '').trim();
-  if (NEWS_WEBHOOK_KEY && key !== NEWS_WEBHOOK_KEY) return res.status(403).json({ ok: false });
+  if (NEWS_WEBHOOK_KEY && key !== NEWS_WEBHOOK_KEY) {
+    res.status(403).json({ ok: false });
+    return false;
+  }
+  return true;
+}
+
+app.get('/api/admin/feed/:kind', (req, res) => {
+  if (!requireAdminKey(req, res)) return;
+  const kind = String(req.params.kind || '').toLowerCase() === 'changelog' ? 'changelog' : 'news';
+  const file = kind === 'changelog' ? CHANGELOG_FILE : NEWS_FILE;
+  res.json({ ok: true, items: readFeed(file) });
+});
+
+app.post('/api/admin/feed/:kind/remove', (req, res) => {
+  if (!requireAdminKey(req, res)) return;
+  const kind = String(req.params.kind || '').toLowerCase() === 'changelog' ? 'changelog' : 'news';
+  const file = kind === 'changelog' ? CHANGELOG_FILE : NEWS_FILE;
+  const ts = Number(req.body?.ts || 0);
+  if (!ts) return res.status(400).json({ ok: false, msg: 'ts obrigatório' });
+
+  const items = readFeed(file);
+  const next = items.filter((i) => Number(i?.ts || 0) !== ts);
+  writeFeed(file, next);
+  res.json({ ok: true, removed: items.length - next.length });
+});
+
+app.post('/webhook/news', (req, res) => {
+  if (!requireAdminKey(req, res)) return;
   const item = extractDiscordItem(req.body);
   const items = readFeed(NEWS_FILE);
   items.unshift(item);
@@ -254,8 +282,7 @@ app.post('/webhook/news', (req, res) => {
 });
 
 app.post('/webhook/changelog', (req, res) => {
-  const key = String(req.query.key || req.headers['x-heeph-key'] || '').trim();
-  if (NEWS_WEBHOOK_KEY && key !== NEWS_WEBHOOK_KEY) return res.status(403).json({ ok: false });
+  if (!requireAdminKey(req, res)) return;
   const item = extractDiscordItem(req.body);
   const items = readFeed(CHANGELOG_FILE);
   items.unshift(item);
