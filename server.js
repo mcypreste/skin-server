@@ -103,7 +103,8 @@ function offlineUUID(name) {
 function stripDashes(uuid) { return uuid.replace(/-/g, ''); }
 
 function buildSignedProfile(req, uuid, username, skinFile, model) {
-  const base = `${req.protocol}://${req.get('host')}`;
+  const proto = req.get('x-forwarded-proto') || req.protocol;
+  const base = `${proto}://${req.get('host')}`;
   const skinUrl = `${base}/textures/${skinFile}`;
 
   const texturesObj = {
@@ -132,6 +133,7 @@ function buildSignedProfile(req, uuid, username, skinFile, model) {
 
 // ── Express ───────────────────────────────────────────
 const app    = express();
+app.set('trust proxy', true);
 const upload = multer({ dest: path.join(DATA_DIR, 'tmp') });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
