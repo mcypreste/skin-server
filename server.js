@@ -137,7 +137,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (_req, res) => {
-  res.status(200).send('ok');
+  res.json({ ok: true, server: 'Heeph Skin Server' });
 });
 
 app.get('/healthz', (_req, res) => {
@@ -299,9 +299,6 @@ app.get('/sessionserver/session/minecraft/hasJoined', (req, res) => {
   if (!entry) return res.status(204).send();
   res.json(buildSignedProfile(req, entry.uuid, entry.username, entry.skinFile, entry.model || ''));
 });
-
-// ── Health check ─
-app.get('/', (req, res) => res.json({ ok: true, server: 'Heeph Skin Server' }));
 
 app.listen(PORT, () => {
   console.log(`Heeph Skin Server rodando em :${PORT}`);
