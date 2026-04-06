@@ -12,9 +12,3 @@ services:
         generateValue: true
       - key: NEWS_WEBHOOK_KEY
         generateValue: true
-      - key: DATA_DIR
-        value: /var/data
-    disk:
-      name: heeph-data
-      mountPath: /var/data
-      sizeGB: 1
