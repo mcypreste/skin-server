@@ -2,7 +2,7 @@ services:
   - type: web
     name: heeph-skin-server
     env: docker
-    rootDir: skin-server
+    rootDir: .
     plan: free
     autoDeploy: true
     envVars:

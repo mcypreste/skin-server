@@ -136,6 +136,14 @@ const upload = multer({ dest: path.join(DATA_DIR, 'tmp') });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/', (_req, res) => {
+  res.status(200).send('ok');
+});
+
+app.get('/healthz', (_req, res) => {
+  res.json({ ok: true, ts: Date.now() });
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
